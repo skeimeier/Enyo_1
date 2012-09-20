@@ -1,0 +1,13 @@
+<NotepadPlus>
+    <Session activeView="0">
+        <mainView activeIndex="4">
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="672" startPos="255" endPos="255" selMode="0" lang="HTML" encoding="-1" filename="C:\Program Files\HP webOS\SDK\share\refcode\webos-framework\enyo\1.0\support\entwicklung\IPS\index.html" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="128" startPos="0" endPos="0" selMode="0" lang="Normaler Text" encoding="-1" filename="C:\Program Files\HP webOS\SDK\share\refcode\webos-framework\enyo\1.0\support\entwicklung\IPS\framework_config.json" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="200" startPos="52" endPos="52" selMode="0" lang="Javascript" encoding="-1" filename="C:\Program Files\HP webOS\SDK\share\refcode\webos-framework\enyo\1.0\support\entwicklung\IPS\depends.js" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="240" startPos="20" endPos="20" selMode="0" lang="Normaler Text" encoding="-1" filename="C:\Program Files\HP webOS\SDK\share\refcode\webos-framework\enyo\1.0\support\entwicklung\IPS\appinfo.json" />
+            <File firstVisibleLine="46" xOffset="0" scrollWidth="864" startPos="2236" endPos="2236" selMode="0" lang="Javascript" encoding="-1" filename="C:\Program Files\HP webOS\SDK\share\refcode\webos-framework\enyo\1.0\support\entwicklung\IPS\source\IPS.js" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="1" startPos="0" endPos="0" selMode="0" lang="CSS" encoding="-1" filename="C:\Program Files\HP webOS\SDK\share\refcode\webos-framework\enyo\1.0\support\entwicklung\IPS\css\IPS.css" />
+        </mainView>
+        <subView activeIndex="0" />
+    </Session>
+</NotepadPlus>
