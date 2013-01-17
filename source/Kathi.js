@@ -1,12 +1,19 @@
 enyo.kind({
-  name: "MyApps.Kathi",
+  name: "Kathi",
   kind: enyo.VFlexBox,
   components: [
-		{name: "Kathi", kind: "WebService", 
+		{name: "KathiService", kind: "WebService", 
 		handleAs: "text",	//Response object
         url: "http://192.168.115.100:9000/HandleKey/",
         method: "GET",
         onSuccess: "kathiSuccess",
+        onFailure: "kathiFailure"},
+		
+		{name: "KathiCurrent", kind: "WebService", 
+		handleAs: "html",	//Response object
+        url: "http://192.168.115.100:9000/Current/00001",
+        method: "GET",
+        onSuccess: "kathiCurrentSuccess",
         onFailure: "kathiFailure"},
 				
 		{kind: "ModalDialog", name: "errorBox",  lazy: false,  components: [
@@ -17,6 +24,17 @@ enyo.kind({
 		{kind: "PageHeader", content: "Enyo Kathrein",
 		    components:[
 			   {kind: "Image", src: "img/kathrein.png"},
+			   {kind: "Image", name: "PingImg", src: "http://192.168.115.100:9000/icon/1", showing : true, onerror: "kathiFailure" },
+			   //{kind: "Image", src: "http://192.168.115.100:9000/icon/2"},
+			   //{kind: "Image", src: "http://192.168.115.100:9000/icon/3"},
+			   //{kind: "Image", src: "http://192.168.115.100:9000/icon/4"},
+			   //{kind: "Image", src: "http://192.168.115.100:9000/icon/5"},
+			   //{kind: "Image", src: "http://192.168.115.100:9000/icon/6"},
+			   //{kind: "Image", src: "http://192.168.115.100:9000/icon/7"},
+			   //{kind: "Image", src: "http://192.168.115.100:9000/tvtv/4162"},
+			   //{kind: "Image", src: "http://192.168.115.100:9000/tvtv/4163"},
+			   {kind: "Image", src: "http://192.168.115.100:9000/tvtv/5"},
+			   
 			   {kind: "Image", src: "img/icons/Transparent.png"}			   
 			]
 		},
@@ -33,45 +51,31 @@ enyo.kind({
 			{kind: "ActivityButton", name: "info", caption: "Info", onclick: "doClick", flex: 1}
 		]},
 		{kind: "ActivityButton", name: "exit", disabled: false, active: false,  caption: "Back" , onclick: "doClick"},
-		{kind: "ActivityButton", name: "PlugButton", disabled: false, active: false,  caption: "Plugwise" , onclick: ""},
-		{name: "Komponent2",kind: "Button", caption: "2"}, 
+		{kind: "KathiCurrent", name: "current" }, 
+		//{kind: "ActivityButton", name: "PlugButton", disabled: false, active: false,  caption: "Plugwise" , onclick: ""},
+		//{kind: "Button", name: "Komponent2", caption: "2"}, 
 
   ],
+ 
   rendered: function() {
-        //this.ipsGetEZStatus();
+        //enyo.log("PingImg.With ",this.PingImg.width);
         //this.ipsGetWZStatus();
+		this.senderListe = [];
+	    this.$.KathiCurrent.call('');
+ 		this.job = setInterval(enyo.bind(this, this.kathiCurrentUpdate), 10000);
+		
  },
-  ipsGetEZStatus: function() {
-	this.$.ipsJson.call('{"jsonrpc": "2.0", "method": "GetValue", "params": [46400],"id": "100"}');
-  },
-  ipsGetWZStatus: function() {
-	this.$.ipsJson.call('{"jsonrpc": "2.0", "method": "GetValue", "params": [41791],"id": "105"}');
-	this.$.ipsJson.call('{"jsonrpc": "2.0", "method": "GetValue", "params": [40009],"id": "106"}');
 
-  },
+
   doClick: function(inSender) {	
 	var befehl = inSender.name; 
    	enyo.log("got Click from: ",befehl);
 	url = "http://192.168.115.100:9000/HandleKey/"+ befehl;
    	enyo.log(url);
-	this.$.Kathi.setUrl(url);
-	this.$.Kathi.call('');
+	this.$.KathiService.setUrl(url);
+	this.$.KathiService.call('');
  },
-  ipsClick: function(inSender) {	
-    //var url = "http://192.168.115.22:82/jsonrpc.php";
-	//this.$.ipsJson.setUrl(url);
-	//this.$.ipsJson.call('{"jsonrpc": "2.0", "method": "IPS_GetAllInstances", "params": [0],"id": "1"}');
-	//this.$.ipsJson.call('{"jsonrpc": "2.0", "method": "IPS_GetInstanceListByModuleID", "params": ["{48FCFDC1-11A5-4309-BB0B-A0DB8042A969}"],"id": "1"}');
-   //IPS_GetInstanceListByModuleID("{EE4A81C6-5C90-4DB7-AD2F-F6BBD521412E}"
-	//this.$.ipsJson.call('{"jsonrpc": "2.0", "method": "IPS_GetScript", "params": [25994],"id": "1"}');
-	//49017  /*[Aussen]*/
-	//46400  /*[Erdgeschoss\Esszimmer\Sideboard-Lampe\Intensität]*/
-	//this.$.ipsJson.call('{"jsonrpc": "2.0", "method": "FS20_SetIntensity", "params": [59045,7,0],"id": "1"}');
-	this.$.ipsJson.call('{"jsonrpc": "2.0", "method": "GetValue", "params": [40009],"id": "111"}');
-	 //inSender.setActive(true);
-	 this.$.ipsButton.setActive(true);
-	 this.$.ipsButton.setDisabled(true);
-  },
+ 
   ipsTestForObj: function(inObj) {
 			if( typeof inObj == 'object'){
 				//var xobj = ipsobj[name];
@@ -106,10 +110,73 @@ enyo.kind({
 		}
 	}
   },
-
   
+ kathiCurrentSuccess: function(inSender, inResponse) {
+	enyo.log("got success from KathiCurrent:", inResponse);
+	var myWebviev = this.$.current.$.currentWebView;
+	myWebviev.setUrl("http://192.168.115.100:9000/Current/00001");
+	myWebviev.node.hidden = false;
+ }, 
+ 
+ kathiCurrentUpdate: function() {
+	var myWebview = this.$.current.$.currentWebView;
+	if( myWebview.hasNode() ){
+		var info = myWebview.node.contentDocument.getElementById("info");
+		info.src = "/Detailed/00001T04162S1357848900";
+		var detail = myWebview.node.contentDocument.getElementById("detail");
+		
+		//detail.style.visibility="visible";
+		
+		//var bars = myWebview.node.contentDocument.getElementsByTagName("id");
+		//var logo  = bar.findNodeById("logo");
+		var bar = myWebview.node.contentDocument.getElementById("Bar");;
+		var barin = myWebview.node.contentDocument.querySelectorAll("#logo");
+		//var barinfo = myWebview.node.
+		var line = "";
+		this.senderListe = [];  // Leeren
+		this.findLogoUrl(barin);
+	}
+ }, 
+ findLogoUrl: function(nodeListe){
+	var sendInfo = {};
+    var i = 0;
+	for (var elem in nodeListe) {
+		if(i === nodeListe.length) { return };
+	    sendInfo.name = nodeListe[elem].querySelector("a").name; 
+	    sendInfo.logoLink = (nodeListe[elem].querySelector("img")) ? nodeListe[elem].querySelector("img").src : null;
+		var nextSib = nodeListe[elem].nextElementSibling;
+		var cells = nextSib.querySelectorAll("table>tbody>tr>td"); 
+		sendInfo.senderNo = cells[0].textContent;
+		sendInfo.sender = cells[1].textContent;
+		nextSib = nextSib.nextElementSibling;
+		var icon = nextSib.childNodes[0].src;
+		sendInfo.icon = icon;
+		nextSib = nextSib.nextElementSibling;
+		if( nextSib.attributes.length === 5 ){ 
+			var klickText =  nextSib.attributes[2].childNodes[0].data;
+				var sndID = klickText.split("'")[1];
+		}else{ 
+			var sndID = "";
+		};
+		sendInfo.detailId = klickText;
+		var sendung = nextSib.childNodes[0].data;
+		sendInfo.sendung = sendung;
+		
+		nextSib = nextSib.nextElementSibling;
+		var cells = nextSib.querySelector("#textn>table>tbody>tr>td:nth-of-type(1)>img"); 
+			sendInfo.fortschritt = (cells) ? cells.width : 0;
+// Link zur SelectorSyntax->   http://www.w3schools.com/cssref/css_selectors.asp 			
+//*[@id="textn"]/table/tbody/tr/td[1]/img
+		this.senderListe.push(sendInfo);
+		i++;
+    }
+	i=0;
+ },
   kathiSuccess: function(inSender, inResponse) {
-	enyo.log("got success from ipsJson:", inResponse);
+	enyo.log("got success from KathiService:", inResponse);
+	//if(inResponse == ""){
+	//	this.showDialog({data:"Kathi", message:" Keine Verbindung!"});		
+	//}
 	if(inResponse.error !== undefined){
 		this.showDialog(inResponse.error);		
 	}
@@ -152,7 +219,7 @@ enyo.kind({
 	}
 
   },
-
+  
   showDialog: function(inContent) {
     this.$.errorData.setContent(inContent.data);
     this.$.errorMessage.setContent(inContent.message);
@@ -170,16 +237,16 @@ enyo.kind({
     // then close dialog
     this.$.dialog.close();
  },
-	
-	
-	
-	
-	
-	
-	
-  kathiFailure: function() {
-	enyo.log("Keine Antwort von Kathi");
+  kathiFailure: function(inSender, inResponse) {
+		this.showDialog({data:"Kathi", message:" Keine Verbindung!"});
   },
+	
+	
+	
+	
+	
+	
+	
   plugFailure: function() {
 	enyo.log("got failure from Plugdevice");
   },
