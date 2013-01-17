@@ -1,0 +1,11 @@
+.kathi-current-item {
+	background: -webkit-gradient(linear, left top, left bottom, from(rgba(218,235,251,0.4)), to(rgba(197,224,249,0.4)));
+	/* font-size: 12px;	*/
+	
+}
+.kathi-current-item-text {
+      padding: 0px; 
+	  text-overflow: ellipsis; 
+	  overflow: hidden; 
+	  white-space: nowrap;
+}

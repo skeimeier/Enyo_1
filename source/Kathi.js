@@ -17,8 +17,8 @@ enyo.kind({
         onFailure: "kathiFailure"},
 				
 		{kind: "ModalDialog", name: "errorBox",  lazy: false,  components: [
-			{name: "errorData", content: "errorData", className: "enyo-text-error warning-icon"},
-			{name: "errorMessage", content: "errorData", className: "enyo-text-error warning-icon"},
+			{name: "errorData", content: "errorData"}, 
+			{name: "errorMessage", content: "errorMessage"}, 
 			{kind: "Button", caption: "OK", onclick: "closeDialog"}
 		]},
 		{kind: "PageHeader", content: "Enyo Kathrein",
@@ -52,8 +52,9 @@ enyo.kind({
 		]},
 		{kind: "ActivityButton", name: "exit", disabled: false, active: false,  caption: "Back" , onclick: "doClick"},
 		{kind: "Divider", caption: "Aktuelles Programm"},
-		{kind: "Scroller", flex: 5, components: [
-			{kind: "Repeater", onSetupRow: "listSetupRow"}
+		{kind: "Scroller", flex: 5, 
+		    components: [
+			        {kind: "Repeater", onSetupRow: "listSetupRow"}
 			]
 		},
 
@@ -167,7 +168,7 @@ enyo.kind({
 		}else{ 
 			var sndID = "";
 		};
-		sendInfo.detailId = klickText;
+		sendInfo.detailId = sndID;
 		var sendung = nextSib.childNodes[0].data;
 		sendInfo.sendung = sendung;
 		
@@ -197,23 +198,36 @@ enyo.kind({
 			var senderNo =  d[inIndex].senderNo; 
 			//if (this.deviceInfo){
 				//if (this.deviceInfo.screenWidth < 1000 ){
-					return {kind: "SwipeableItem", tapHighlight: true, layoutKind: "HFlexLayout", onclick: "itemClick", style: "background: -webkit-gradient(linear, left top, left bottom, from(rgba(218,235,251,0.4)), to(rgba(197,224,249,0.4)))",
+					return {kind: "SwipeableItem", tapHighlight: true, layoutKind: "HFlexLayout",
+					className: "kathi-current-item",
 						components: [
 							//{kind: "IconButton", label: senderNo, icon: '<img src="' + logo + '"/>' },
-							{kind: "Item",  tapHighlight: true, layoutKind: "HFlexLayout", style: "padding: 0px 0px; width: 100px; border: 0px ",
+							{kind: "Item",  tapHighlight: true, 
+									layoutKind: "HFlexLayout", style: "padding: 0px 0px; width: 100px; border: 0px ", onclick: "switchToSender",
 								components: [
-									{content: senderNo, style: "padding: 0px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;",flex:1},
-									{content: '<img src="' + logo + '"/>',flex: 2},
+									{content: senderNo, 
+									  className: "kathi-current-item-text", flex:1
+									},
+									{content: '<img src="' + logo + '"/>',flex: 2}
 								]
 							},
 							
-							//{content: senderNo, style: "text-overflow: ellipsis; overflow: hidden; white-space: nowrap;"},
-							//{content: '<img src="' + logo + '"  class="enyo-roundy"/>',flex: 1},
-							//{content: name, style: "text-overflow: ellipsis; overflow: hidden; white-space: nowrap;",  flex: 1},
-							{content: d[inIndex].sender, tapHighlight: true, style: "padding: 0px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;",  flex: 1},
-							{content: d[inIndex].sendung, style: "padding: 0px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;",  flex: 1},
-							{kind: "ProgressBar", position: d[inIndex].fortschritt, style: "padding: 0px;", flex: 1},
-							{content: d[inIndex].fortschritt + "%", style: "text-overflow: ellipsis; overflow: hidden; white-space: nowrap;"}
+							{content: d[inIndex].sender, 
+							        tapHighlight: true,
+									className: "kathi-current-item-text",   flex: 1},
+							{content: d[inIndex].sendung, 
+									className: "kathi-current-item-text", 
+									flex: 1},
+							{kind: "InfoButton", 
+									sndID : d[inIndex].detailId,
+									onclick: "currentInfo"
+									},
+							{kind: "ProgressBar", 
+									position: d[inIndex].fortschritt, 
+									style: "padding: 0px;", flex: 1},
+							{content: d[inIndex].fortschritt + "%", 
+									className: "kathi-current-item-text" 
+							}
 							//{content: this.decodeUTF8(d[inIndex].name), style: "text-overflow: ellipsis; overflow: hidden; white-space: nowrap;",  flex: 1},
 							//{content: d[inIndex].name, style: "text-overflow: ellipsis; overflow: hidden; white-space: nowrap;",  flex: 1},
 							//{kind: "ToggleButton", disabled:  lockstate, state: powerstate, onLabel: "AN", offLabel: "AUS",onChange: "PlugToggle",flex:1}
@@ -328,6 +342,12 @@ enyo.kind({
   kathiFailure: function(inSender, inResponse) {
 		this.showDialog({data:"Kathi", message:" Keine Verbindung!"});
   },
+  currentInfo: function(inSender, inResponse) {
+		this.showDialog({data:"AbrufID", message: inSender.sndID});
+  },
+  switchToSender: function(inSender, inResponse) {
+		this.showDialog({data:"Sender:", message: "xxx"});
+   },
 	
 	
 	
@@ -398,3 +418,17 @@ enyo.kind({
 
 
 });
+
+enyo.kind({
+  name: "InfoButton",
+  kind: "IconButton", 
+  published: {
+		sndID : "sndIDtest"
+  },
+  label: "Info", 
+  icon: "img/icons/Information.png",
+  create: function() {
+		this.inherited(arguments);
+  }
+});
+							
