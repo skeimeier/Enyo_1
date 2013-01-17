@@ -1,0 +1,16 @@
+//*[@id="textn"]/table/tbody/tr/td[1]/img
+//*[@id="textn"]/table/tbody/tr/td[2]/img
+//*[@id="text"]/table/tbody/tr/td[1]
+//*[@id="text"]/table/tbody/tr/td[2]
+/html
+<td id="text" width="400px" onclick="javascript:startPopUp('00001T04162S1357848900');" onmouseover="this.bgColor='#ffff99'" onmouseout="this.bgColor='#d1d5d8'">Star Biathlon 2013</td>
+function stream (Adresse) {  tv = window.open(Adresse, "Stream");  tv.focus();}
+function startPopUp(tvtvid){    
+	document.getElementById("info").src="/Detailed/"+tvtvid;    
+	 document.getElementById("detail").style.visibility="visible";
+	} 
+	 
+function setTimer(TimerId){    document.getElementById("timer").src="/SetTimer/"+TimerId;    document.getElementById("timerwindow").style.visibility="visible";    window.setTimeout("reloadMainWindow()", 1000);} 
+
+  function delTimer(TimerNo){    document.getElementById("timer").src="/DeleteTimer/"+TimerNo;    document.getElementById("timerwindow").style.visibility="visible";    window.setTimeout("reloadMainWindow()", 1000);}
+  function reloadMainWindow(){    document.getElementById("timerwindow").style.visibility="hidden";    parent.location.reload();}   function standby(){    check = confirm(unescape("M%F6chten Sie den Receiver jetzt in Standby schalten?"));	if (check == true) {	window.location.href = "/Standby/";	}	else {	return false;	}}
