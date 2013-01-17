@@ -51,7 +51,14 @@ enyo.kind({
 			{kind: "ActivityButton", name: "info", caption: "Info", onclick: "doClick", flex: 1}
 		]},
 		{kind: "ActivityButton", name: "exit", disabled: false, active: false,  caption: "Back" , onclick: "doClick"},
-		{kind: "KathiCurrent", name: "current" }, 
+		{kind: "Divider", caption: "Aktuelles Programm"},
+		{kind: "Scroller", flex: 5, components: [
+			{kind: "Repeater", onSetupRow: "listSetupRow"}
+			]
+		},
+
+		{kind: "KathiCurrent", name: "current", flex: 0 } 
+		//{kind: "ActivityButton", name: "xxx", disabled: false, active: false,  caption: "xxxx" , onclick: "doXxx"},
 		//{kind: "ActivityButton", name: "PlugButton", disabled: false, active: false,  caption: "Plugwise" , onclick: ""},
 		//{kind: "Button", name: "Komponent2", caption: "2"}, 
 
@@ -60,6 +67,9 @@ enyo.kind({
   rendered: function() {
         //enyo.log("PingImg.With ",this.PingImg.width);
         //this.ipsGetWZStatus();
+		
+		this.deviceInfo = enyo.fetchDeviceInfo();
+
 		this.senderListe = [];
 	    this.$.KathiCurrent.call('');
  		this.job = setInterval(enyo.bind(this, this.kathiCurrentUpdate), 10000);
@@ -115,7 +125,7 @@ enyo.kind({
 	enyo.log("got success from KathiCurrent:", inResponse);
 	var myWebviev = this.$.current.$.currentWebView;
 	myWebviev.setUrl("http://192.168.115.100:9000/Current/00001");
-	myWebviev.node.hidden = false;
+	myWebviev.node.hidden = true;
  }, 
  
  kathiCurrentUpdate: function() {
@@ -138,10 +148,9 @@ enyo.kind({
 	}
  }, 
  findLogoUrl: function(nodeListe){
-	var sendInfo = {};
     var i = 0;
 	for (var elem in nodeListe) {
-		if(i === nodeListe.length) { return };
+		var sendInfo = {};
 	    sendInfo.name = nodeListe[elem].querySelector("a").name; 
 	    sendInfo.logoLink = (nodeListe[elem].querySelector("img")) ? nodeListe[elem].querySelector("img").src : null;
 		var nextSib = nodeListe[elem].nextElementSibling;
@@ -169,9 +178,88 @@ enyo.kind({
 //*[@id="textn"]/table/tbody/tr/td[1]/img
 		this.senderListe.push(sendInfo);
 		i++;
+		if(i === nodeListe.length) { 
+			this.$.repeater.render(); 
+			return 
+		};
     }
 	i=0;
+	this.$.repeater.render();
  },
+ 
+ 	listSetupRow: function(inSender, inIndex) {
+		var d = this.senderListe;
+		var url = "http://192.168.115.22:8080/pwimg/32/";
+		if(d){
+		if (inIndex < d.length-1) {
+			var name = d[inIndex].name;
+			var logo = d[inIndex].logoLink;
+			var senderNo =  d[inIndex].senderNo; 
+			//if (this.deviceInfo){
+				//if (this.deviceInfo.screenWidth < 1000 ){
+					return {kind: "SwipeableItem", tapHighlight: true, layoutKind: "HFlexLayout", onclick: "itemClick", style: "background: -webkit-gradient(linear, left top, left bottom, from(rgba(218,235,251,0.4)), to(rgba(197,224,249,0.4)))",
+						components: [
+							//{kind: "IconButton", label: senderNo, icon: '<img src="' + logo + '"/>' },
+							{kind: "Item",  tapHighlight: true, layoutKind: "HFlexLayout", style: "padding: 0px 0px; width: 100px; border: 0px ",
+								components: [
+									{content: senderNo, style: "padding: 0px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;",flex:1},
+									{content: '<img src="' + logo + '"/>',flex: 2},
+								]
+							},
+							
+							//{content: senderNo, style: "text-overflow: ellipsis; overflow: hidden; white-space: nowrap;"},
+							//{content: '<img src="' + logo + '"  class="enyo-roundy"/>',flex: 1},
+							//{content: name, style: "text-overflow: ellipsis; overflow: hidden; white-space: nowrap;",  flex: 1},
+							{content: d[inIndex].sender, tapHighlight: true, style: "padding: 0px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;",  flex: 1},
+							{content: d[inIndex].sendung, style: "padding: 0px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;",  flex: 1},
+							{kind: "ProgressBar", position: d[inIndex].fortschritt, style: "padding: 0px;", flex: 1},
+							{content: d[inIndex].fortschritt + "%", style: "text-overflow: ellipsis; overflow: hidden; white-space: nowrap;"}
+							//{content: this.decodeUTF8(d[inIndex].name), style: "text-overflow: ellipsis; overflow: hidden; white-space: nowrap;",  flex: 1},
+							//{content: d[inIndex].name, style: "text-overflow: ellipsis; overflow: hidden; white-space: nowrap;",  flex: 1},
+							//{kind: "ToggleButton", disabled:  lockstate, state: powerstate, onLabel: "AN", offLabel: "AUS",onChange: "PlugToggle",flex:1}
+						]
+					};
+				//};
+				/* 
+				if (this.deviceInfo.screenWidth > 1000 ){
+					return {kind: "SwipeableItem", layoutKind: "HFlexLayout", onclick: "itemClick", 
+						components: [
+							{content: '<img src="' + url + d[inIndex].image + '"  class="enyo-roundy"/>',flex: 1},
+							{content: 'ID: '+d[inIndex].id,flex: 1},
+							//{content: this.decodeUTF8(d[inIndex].name), style: "text-overflow: ellipsis; overflow: hidden; white-space: nowrap;", flex: 1},
+							{content: this.decodeIt(d[inIndex].name), style: "text-overflow: ellipsis; overflow: hidden; white-space: nowrap;",  flex: 1},
+							{content: d[inIndex].powerusageround, flex: 1},
+							{kind: "ToggleButton", disabled:  lockstate, state: powerstate, onLabel: "AN", offLabel: "AUS",onChange: "PlugToggle",flex:1},
+							{content: 'Lock '+lock.substr(4)+" = "+lockstate, flex: 1},
+							{content: 'Switch '+powerstate, flex: 1}
+						]
+					};
+				};
+			}
+			else{
+				return {kind: "SwipeableItem", layoutKind: "HFlexLayout", onclick: "itemClick", 
+					components: [
+						{content: '<img src="' + url + d[inIndex].image + '"  class="enyo-roundy"/>',flex: 1},
+						{content: 'ID: '+d[inIndex].id,flex: 1},
+						//{content: this.decodeUTF8(d[inIndex].name), style: "text-overflow: ellipsis; overflow: hidden; white-space: nowrap;",flex: 1},
+						{content: this.decodeIt(d[inIndex].name), style: "text-overflow: ellipsis; overflow: hidden; white-space: nowrap;",  flex: 1},
+						{content: d[inIndex].powerusageround, flex: 1},
+						{kind: "ToggleButton", disabled:  lockstate, state: powerstate, onLabel: "AN", offLabel: "AUS",onChange: "PlugToggle",flex:1},
+						{content: 'Lock '+lock.substr(4)+" = "+lockstate, flex: 1},
+						{content: 'Switch '+powerstate, flex: 1}
+					]
+				};
+			};
+			
+		};
+			
+		};
+		*/
+	}
+	}
+	},
+
+ 
   kathiSuccess: function(inSender, inResponse) {
 	enyo.log("got success from KathiService:", inResponse);
 	//if(inResponse == ""){
