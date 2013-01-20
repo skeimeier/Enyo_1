@@ -16,6 +16,15 @@ enyo.kind({
         onSuccess: "kathiCurrentSuccess",
         onFailure: "kathiFailure"},
 				
+
+		{name: "KathiInfo", kind: "WebService", 
+		handleAs: "html",	//Response object
+        url: "",
+        method: "GET",
+        onSuccess: "kathiInfoSuccess",
+        onFailure: "kathiFailure"},
+
+
 		{kind: "ModalDialog", name: "errorBox",  lazy: false,  components: [
 			{name: "errorData", content: "errorData"}, 
 			{name: "errorMessage", content: "errorMessage"}, 
@@ -23,19 +32,8 @@ enyo.kind({
 		]},
 		{kind: "PageHeader", content: "Enyo Kathrein",
 		    components:[
-			   {kind: "Image", src: "img/kathrein.png"},
-			   {kind: "Image", name: "PingImg", src: "http://192.168.115.100:9000/icon/1", showing : true, onerror: "kathiFailure" },
-			   //{kind: "Image", src: "http://192.168.115.100:9000/icon/2"},
-			   //{kind: "Image", src: "http://192.168.115.100:9000/icon/3"},
-			   //{kind: "Image", src: "http://192.168.115.100:9000/icon/4"},
-			   //{kind: "Image", src: "http://192.168.115.100:9000/icon/5"},
-			   //{kind: "Image", src: "http://192.168.115.100:9000/icon/6"},
-			   //{kind: "Image", src: "http://192.168.115.100:9000/icon/7"},
-			   //{kind: "Image", src: "http://192.168.115.100:9000/tvtv/4162"},
-			   //{kind: "Image", src: "http://192.168.115.100:9000/tvtv/4163"},
-			   {kind: "Image", src: "http://192.168.115.100:9000/tvtv/5"},
-			   
-			   {kind: "Image", src: "img/icons/Transparent.png"}			   
+			   {kind: "Image", src: "./img/kathrein.png"},
+			   {kind: "Image", name: "PingImg", src: "http://192.168.115.100:9000/icon/1", showing : true, onerror: "kathiFailure" }
 			]
 		},
 		{layoutKind: enyo.HFlexLayout,
@@ -58,7 +56,9 @@ enyo.kind({
 			]
 		},
 
-		{kind: "KathiCurrent", name: "current", flex: 0 } 
+		{kind: "KathiAktuellesProgramm", name: "current", flex: 0 },
+		{kind: "KathiAktuellesProgramm", name: "programmInfo", flex: 0 }
+		
 		//{kind: "ActivityButton", name: "xxx", disabled: false, active: false,  caption: "xxxx" , onclick: "doXxx"},
 		//{kind: "ActivityButton", name: "PlugButton", disabled: false, active: false,  caption: "Plugwise" , onclick: ""},
 		//{kind: "Button", name: "Komponent2", caption: "2"}, 
@@ -72,8 +72,11 @@ enyo.kind({
 		this.deviceInfo = enyo.fetchDeviceInfo();
 
 		this.senderListe = [];
-	    this.$.KathiCurrent.call('');
- 		this.job = setInterval(enyo.bind(this, this.kathiCurrentUpdate), 10000);
+	    this.$.KathiCurrent.call();
+	    this.$.KathiInfo.call();
+		
+		if(this.job){ clearInterval(this.job)};
+ 		//this.job = setInterval(enyo.bind(this, this.kathiCurrentUpdate), 2000);
 		
  },
 
@@ -84,57 +87,51 @@ enyo.kind({
 	url = "http://192.168.115.100:9000/HandleKey/"+ befehl;
    	enyo.log(url);
 	this.$.KathiService.setUrl(url);
-	this.$.KathiService.call('');
+	this.$.KathiService.call();
  },
  
-  ipsTestForObj: function(inObj) {
-			if( typeof inObj == 'object'){
-				//var xobj = ipsobj[name];
-				for(xname in inObj){
-					if( typeof inObj[name] !== 'function'){  
-						this.$.ipsshow.addContent(">");
-						this.$.ipsshow.addContent(xname + " : " + inObj[xname]+ "<BR>");
-						this.ipsTestForObj(inObj[xname]);
-					}
-				}		
-			}
-  },
-  plugSuccess: function(inSender, inResponse) {
-  	enyo.log("got success from Plugdevice:", inResponse);
-   },
-  
-  plugSuccess: function(inSender, inResponse) {
-  	enyo.log("got success from Plugdevice:", inResponse);
-
-  },
-
-  plugApiSuccess: function(inSender, inResponse) {
-  	enyo.log("got success from Plugapi:", inResponse);
-   var appls =  inResponse.getElementsByTagName("appliance");
-   var count = appls.length;
-  for(teil=0;teil<count;teil += 1 ){
-        var id = appls[teil].getElementsByTagName("id")[0];
- 		while (id){
-			var name = id.tagName;
-			var val = id.textContent;
-			id = id.nextSibling;
-		}
-	}
-  },
   
  kathiCurrentSuccess: function(inSender, inResponse) {
-	enyo.log("got success from KathiCurrent:", inResponse);
+	//enyo.log("got success from KathiCurrent:", inResponse);
 	var myWebviev = this.$.current.$.currentWebView;
 	myWebviev.setUrl("http://192.168.115.100:9000/Current/00001");
 	myWebviev.node.hidden = true;
+	this.kathiCurrentUpdate();
  }, 
+ 
+ kathiInfoSuccess: function(inSender, inResponse) {
+	enyo.log("got success from KathiInfo:", inResponse);
+	var myWebviev = this.$.programmInfo.$.currentWebView;
+	myWebviev.setUrl(this.$.KathiInfo.url);
+	//myWebviev.setUrl("http://192.168.115.100:9000/Current/00001");
+	//myWebviev.node.hidden = true;
+	this.kathiProgInfoUpdate();
+
+ }, 
+
+ kathiProgInfoUpdate: function() {
+	var myWebview = this.$.current.$.currentWebView;
+	if(this.job2){ clearInterval(this.job2)};
+ 	this.job2 = setInterval(enyo.bind(this, this.kathiProgInfoUpdate), 1000);
+
+	if( myWebview.hasNode() ){
+		var xxxx = 0;
+	}
+ },
  
  kathiCurrentUpdate: function() {
 	var myWebview = this.$.current.$.currentWebView;
+	if(this.job){ clearInterval(this.job)};
+ 	this.job = setInterval(enyo.bind(this, this.kathiCurrentUpdate), 1000);
+
 	if( myWebview.hasNode() ){
-		var info = myWebview.node.contentDocument.getElementById("info");
-		info.src = "/Detailed/00001T04162S1357848900";
-		var detail = myWebview.node.contentDocument.getElementById("detail");
+	    if(this.senderListe.length){
+		     if(this.job){ clearInterval(this.job)};
+ 		     this.job = setInterval(enyo.bind(this, this.kathiCurrentUpdate), 10000);
+		}
+		//var info = myWebview.node.contentDocument.getElementById("info");
+		//info.src = "/Detailed/00001T04162S1357848900";
+		//var detail = myWebview.node.contentDocument.getElementById("detail");
 		
 		//detail.style.visibility="visible";
 		
@@ -148,6 +145,7 @@ enyo.kind({
 		this.findLogoUrl(barin);
 	}
  }, 
+ 
  findLogoUrl: function(nodeListe){
     var i = 0;
 	for (var elem in nodeListe) {
@@ -188,10 +186,9 @@ enyo.kind({
 	this.$.repeater.render();
  },
  
- 	listSetupRow: function(inSender, inIndex) {
-		var d = this.senderListe;
-		var url = "http://192.168.115.22:8080/pwimg/32/";
-		if(d){
+ listSetupRow: function(inSender, inIndex) {
+	var d = this.senderListe;
+	if(d){
 		if (inIndex < d.length-1) {
 			var name = d[inIndex].name;
 			var logo = d[inIndex].logoLink;
@@ -282,43 +279,6 @@ enyo.kind({
 	if(inResponse.error !== undefined){
 		this.showDialog(inResponse.error);		
 	}
-	if(inResponse.id === "1"){
-		var ipsobj = inResponse.result;
-		enyo.log("got success from ipsJson:", ipsobj.ObjectName);
-		this.results = ipsobj.ChildrenIDs;
-	
-		this.$.Komponent2.setContent(ipsobj.ObjectName);
-		for(name in ipsobj){
-			if( typeof ipsobj[name] !== 'function'){  
-				this.$.ipsshow.addContent(name + " : " + ipsobj[name]+ "<BR>");
-				this.ipsTestForObj(ipsobj[name]);
-				/*if( typeof ipsobj[name] == 'object'){
-					var xobj = ipsobj[name];
-					for(xname in xobj){
-						if( typeof xobj[name] !== 'function'){  
-							this.$.ipsshow.addContent(">    " + xname + " : " + xobj[xname]+ "<BR>");
-						}
-					}		
-				}	
-				*/
-			}
-		}
-		this.$.ipsButton.setActive(false);
-		this.$.ipsButton.setDisabled(false);
-
-	}
-	if(inResponse.id === "100"){
-		var ipsobj = inResponse.result*6.25;
-		this.$.EZSlider.setPosition(ipsobj);
-	}
-	if(inResponse.id === "105"){
-		var ipsobj = inResponse.result*6.25;
-		this.$.WZSlider.setPosition(ipsobj);
-	}
-	if(inResponse.id === "106"){
-		var ipsobj = inResponse.result;
-		this.$.ToggleSchrankwand.setState(ipsobj);
-	}
 
   },
   
@@ -343,80 +303,22 @@ enyo.kind({
 		this.showDialog({data:"Kathi", message:" Keine Verbindung!"});
   },
   currentInfo: function(inSender, inResponse) {
-		this.showDialog({data:"AbrufID", message: inSender.sndID});
+	//	this.showDialog({data:"AbrufID", message: inSender.sndID});
+		this.$.KathiInfo.url = "http://192.168.115.100:9000/Detailed/"+inSender.sndID;
+		this.$.KathiInfo.call();
+		
   },
   switchToSender: function(inSender, inResponse) {
-		this.showDialog({data:"Sender:", message: "xxx"});
+		this.showDialog({data:"Sender:", message: inSender.components[0].content});
    },
 	
-	
-	
-	
-	
-	
-	
-  plugFailure: function() {
-	enyo.log("got failure from Plugdevice");
-  },
  
   create: function() {
 	this.inherited(arguments);
 	this.results = [];
-  },
-  getIpsItem: function(inSender, inIndex) {
-	var r = this.results[inIndex];
-	if (r) {
-     // this.$.title2.setCaption(r);
-      this.$.description2.setContent(inIndex);
-      return true;
-	}
-  },
-  esszimmerToggle: function(inSender, inState) {
-    this.log("Toggled to state" + inState);
-	//if(inState){
-		this.$.ipsJson.call('{"jsonrpc": "2.0", "method": "FS20_SwitchMode", "params": [29910,'+inState+'],"id": "1"}');
-	//}
-	//else{
-	//	this.$.ipsJson.call('{"jsonrpc": "2.0", "method": "FS20_SetIntensity", "params": [29910,false],"id": "1"}');
-	//}
-  },
-  wohnzimmerToggle: function(inSender, inState) {
-    this.log("Toggled to state" + inState);
-	//if(inState){
-		this.$.ipsJson.call('{"jsonrpc": "2.0", "method": "FS20_SwitchMode", "params": [55366,'+inState+'],"id": "1"}');
-	//}
-	//else{
-	//	this.$.ipsJson.call('{"jsonrpc": "2.0", "method": "FS20_SetIntensity", "params": [45397,0,3],"id": "1"}');
-	//}
-  },
-  wzsliderChange: function(inSender, inPos) {
-    this.log("Slide to Pos: " + inPos);
-	var pos = Math.round(inPos/6.25);
-	this.$.ipsJson.call('{"jsonrpc": "2.0", "method": "FS20_SetIntensity", "params": [45397,'+pos+',0],"id": "1"}');
-
- },
-  ezsliderChange: function(inSender, inPos) {
-    this.log("Slide to Pos: " + inPos);
-	var pos = Math.round(inPos/6.25);
-	this.$.ipsJson.call('{"jsonrpc": "2.0", "method": "FS20_SetIntensity", "params": [59045,'+pos+',0],"id": "1"}');
-
- },
-  fernsehnToggle: function(inSender, inState) {
-    var status = inState?"on":"off";
-	this.log("Fernsehn to State: " + status);
-    
-	this.$.Plugwise.call({applid:4,cmd:status});
-
- }
+  }
 
  
-
-
-
-
-
-
-
 });
 
 enyo.kind({

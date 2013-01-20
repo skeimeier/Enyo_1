@@ -1,5 +1,5 @@
 enyo.kind({
-  name: "KathiCurrent",
+  name: "KathiAktuellesProgramm",
   kind: enyo.Scroller, flex: 1, 
 	components: [
 			{kind: (window.PalmSystem ? enyo.WebView : enyo.Iframe),
@@ -13,7 +13,6 @@ enyo.kind({
 	rendered: function() {
      this.inherited(arguments);
        enyo.log("Current rendered ");
-        //this.ipsGetWZStatus();
 	    
     },
 	hideWebViewSpinner: function() {
