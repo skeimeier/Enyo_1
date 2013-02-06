@@ -30,10 +30,20 @@ enyo.kind({
 			{name: "errorMessage", content: "errorMessage"}, 
 			{kind: "Button", caption: "OK", onclick: "closeDialog"}
 		]},
-		{kind: "PageHeader", content: "Enyo Kathrein",
+		
+		{kind: "ModalDialog", name: "infoToast", lazy: false, flyInFrom: "top",  
+			components: [
+			{name: "infoSender", content: "1"}, 
+			{name: "infoSendung", content: "2"}, 
+			{name: "infoTitel", content: "3"}, 
+			{name: "infoInfo", content: "4"}, 
+			{kind: "Button", caption: "OK", onclick: "closeInfoToast"}
+			]
+		},
+		{kind: "PageHeader", name: "header", content: "Enyo Kathrein",
 		    components:[
 			   {kind: "Image", src: "./img/kathrein.png"},
-			   {kind: "Image", name: "PingImg", src: "http://192.168.115.100:9000/icon/1", showing : true, onerror: "kathiFailure" }
+			   //{kind: "Image", name: "PingImg", src: "http://192.168.115.100:9000/icon/1", showing : true, onerror: "kathiFailure" }
 			]
 		},
 		{layoutKind: enyo.HFlexLayout,
@@ -56,8 +66,12 @@ enyo.kind({
 			]
 		},
 
-		{kind: "KathiAktuellesProgramm", name: "current", flex: 0 },
-		{kind: "KathiAktuellesProgramm", name: "programmInfo", flex: 0 }
+		{kind: "KathiAktuellesProgramm", name: "current", 
+				urlPage: "http://192.168.115.100:9000/Current/00001", 
+				flex: 1 },
+		{kind: "KathiAktuellesProgramm", name: "programmInfo", 
+				urlPage: "", 
+				flex: 1 }
 		
 		//{kind: "ActivityButton", name: "xxx", disabled: false, active: false,  caption: "xxxx" , onclick: "doXxx"},
 		//{kind: "ActivityButton", name: "PlugButton", disabled: false, active: false,  caption: "Plugwise" , onclick: ""},
@@ -72,11 +86,12 @@ enyo.kind({
 		this.deviceInfo = enyo.fetchDeviceInfo();
 
 		this.senderListe = [];
-	    this.$.KathiCurrent.call();
-	    this.$.KathiInfo.call();
+		//this.$.current.setUrlPage("http://192.168.115.100:9000/Current/00001");
+	    //this.$.KathiCurrent.call();
+	    //this.$.KathiInfo.call();
 		
 		if(this.job){ clearInterval(this.job)};
- 		//this.job = setInterval(enyo.bind(this, this.kathiCurrentUpdate), 2000);
+ 		this.job = setTimeout(enyo.bind(this, this.kathiCurrentUpdate), 500);
 		
  },
 
@@ -94,14 +109,16 @@ enyo.kind({
  kathiCurrentSuccess: function(inSender, inResponse) {
 	//enyo.log("got success from KathiCurrent:", inResponse);
 	var myWebviev = this.$.current.$.currentWebView;
+	//myWebviev.onLoadComplete = this.kathiCurrentUpdate();
 	myWebviev.setUrl("http://192.168.115.100:9000/Current/00001");
-	myWebviev.node.hidden = true;
-	this.kathiCurrentUpdate();
+	//myWebviev.node.hidden = true;
+	//this.kathiCurrentUpdate();
  }, 
  
  kathiInfoSuccess: function(inSender, inResponse) {
 	enyo.log("got success from KathiInfo:", inResponse);
 	var myWebviev = this.$.programmInfo.$.currentWebView;
+	
 	myWebviev.setUrl(this.$.KathiInfo.url);
 	//myWebviev.setUrl("http://192.168.115.100:9000/Current/00001");
 	//myWebviev.node.hidden = true;
@@ -110,24 +127,51 @@ enyo.kind({
  }, 
 
  kathiProgInfoUpdate: function() {
-	var myWebview = this.$.current.$.currentWebView;
-	if(this.job2){ clearInterval(this.job2)};
- 	this.job2 = setInterval(enyo.bind(this, this.kathiProgInfoUpdate), 1000);
+	var myWebview = this.$.programmInfo.$.currentWebView;
+	if(this.job2){ clearTimeout(this.job2)};
+ 	this.job2 = setTimeout(enyo.bind(this, this.kathiProgInfoUpdate), 500);
 
 	if( myWebview.hasNode() ){
-		var xxxx = 0;
+		var infoContent = myWebview.node.contentDocument;
+		if( infoContent.all.length > 3 ){
+			var bars = myWebview.node.contentDocument.querySelectorAll("div#Bar");
+			var texte1 = bars[0].querySelectorAll("td#text");
+			var senderName = texte1[0].textContent + " " + texte1[1].textContent;
+			var texte1 = bars[1].querySelectorAll("td#text");
+			var progDauer_Name = texte1[0].textContent + " " + texte1[1].textContent;
+			var contents = myWebview.node.contentDocument.querySelector("div#content").outerText;
+			var texte = contents.split("\n");
+			var infoTitel = texte[0];
+			var infoText = texte[1];
+			
+			this.$.infoSender.setContent(senderName);
+			this.$.infoSendung.setContent(progDauer_Name);
+			this.$.infoTitel.setContent(infoTitel);
+			this.$.infoInfo.setContent(infoText);
+
+			if(this.job2){ clearTimeout(this.job2)};
+			this.$.infoToast.open();
+			this.job3 = setTimeout(enyo.bind(this, this.closeInfoToast), 5000);
+
+			//*[@id="text"]
+		}
 	}
  },
- 
+ kathiCurrentReload: function() {
+	this.$.current.setUrlPage("http://192.168.115.100:9000/Current/00001");
+ 	if(this.job){ clearTimeout(this.job)};
+ 	this.job = setTimeout(enyo.bind(this, this.kathiCurrentUpdate), 500);
+
+ },
  kathiCurrentUpdate: function() {
 	var myWebview = this.$.current.$.currentWebView;
-	if(this.job){ clearInterval(this.job)};
- 	this.job = setInterval(enyo.bind(this, this.kathiCurrentUpdate), 1000);
+	if(this.job){ clearTimeout(this.job)};
+ 	this.job = setTimeout(enyo.bind(this, this.kathiCurrentUpdate), 500);
 
 	if( myWebview.hasNode() ){
 	    if(this.senderListe.length){
-		     if(this.job){ clearInterval(this.job)};
- 		     this.job = setInterval(enyo.bind(this, this.kathiCurrentUpdate), 10000);
+		     if(this.job){ clearTimeout(this.job)};
+ 		     this.job = setTimeout(enyo.bind(this, this.kathiCurrentReload), 60000);
 		}
 		//var info = myWebview.node.contentDocument.getElementById("info");
 		//info.src = "/Detailed/00001T04162S1357848900";
@@ -142,7 +186,9 @@ enyo.kind({
 		//var barinfo = myWebview.node.
 		var line = "";
 		this.senderListe = [];  // Leeren
-		this.findLogoUrl(barin);
+		if(barin.length){
+			this.findLogoUrl(barin);
+		}
 	}
  }, 
  
@@ -292,7 +338,11 @@ enyo.kind({
         this.$.errorBox.close();
 
   },
+  
+  closeInfoToast: function(inContent) {
+        this.$.infoToast.close();
 
+  },
   confirmClick: function() {
     // process confirmation
     //this.doConfirm();
